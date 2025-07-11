@@ -35,7 +35,7 @@ async def root():
     with open('./web/index.html', 'r', encoding="utf-8") as f:
         return f.read()
 
-reader = easyocr.Reader(['ch_tra', 'en'], gpu = True)
+reader = easyocr.Reader(['ch_tra', 'en'], gpu = False)
     
 @app.post("/scamCheck")
 async def Check(file: UploadFile):

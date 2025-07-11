@@ -1,7 +1,8 @@
-FROM python:3.11.13-bookworm AS production
+FROM python:3.11-bookworm AS production
 
 WORKDIR /code
 
+# 安裝系統依賴
 RUN apt update && apt install -y \
   curl \
   git \
@@ -16,32 +17,21 @@ RUN apt update && apt install -y \
   libfreetype6-dev \
   libwebp-dev \
   libopenjp2-7-dev \
-  libtiff5-dev
-
-RUN apt install -y \
+  libtiff5-dev \
   gcc \
   g++ \
-  musl-dev \
-  linux-headers-amd64
+  && rm -rf /var/lib/apt/lists/*
 
+# 安裝 uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# 複製項目文件
 COPY . /code/
 
-# 方法1：使用相容的 PyTorch 版本
-# 先修改 pyproject.toml 中的 torch 版本為 2.5.1 或其他穩定版本
-# 然後執行正常的 uv sync
+# 安裝 Python 依賴（使用 CPU 版本的 PyTorch）
 RUN uv sync --frozen --no-cache
-
-# 方法2：如果必須使用 torch 2.7.1，可以這樣做：
-# 先安裝 PyTorch (使用 pip)
-# RUN pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-# 然後安裝其他依賴 (排除 torch)
-# RUN uv sync --frozen --no-cache --no-install-package torch
-
-# 方法3：使用 CPU 版本的 PyTorch
-# RUN pip install torch==2.5.1+cpu --index-url https://download.pytorch.org/whl/cpu
-# RUN uv sync --frozen --no-cache --no-install-package torch
 
 EXPOSE 8080
 
-CMD ["/code/.venv/bin/fastapi", "run", "--host", "0.0.0.0", "--port", "8080"]
+# 修正 FastAPI 命令，指定主文件
+CMD ["/code/.venv/bin/fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8080"]
