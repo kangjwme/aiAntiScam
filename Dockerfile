@@ -1,13 +1,28 @@
-FROM python:3.13-alpine AS production
+FROM python:3.11.13-bookworm AS production
 
 WORKDIR /code
 
-RUN apk add --no-cache \
-  build-base \
+RUN apt update && apt install -y \
+  curl \
+  git \
+  build-essential \
+  libffi-dev \
+  libssl-dev \
+  libpq-dev \
+  libxml2-dev \
+  libxslt1-dev \
+  zlib1g-dev \
+  libjpeg-dev \
+  libfreetype6-dev \
+  libwebp-dev \
+  libopenjp2-7-dev \
+  libtiff5-dev
+
+RUN apt install -y \
   gcc \
   g++ \
   musl-dev \
-  linux-headers
+  linux-headers-amd64
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY . /code/
