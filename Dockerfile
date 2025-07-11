@@ -36,4 +36,4 @@ ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
 # 修正 FastAPI 命令，指定主文件
-CMD ["/code/.venv/bin/fastapi", "run", "main.py", "--port", "8080", "--host", "0.0.0.0"]
+CMD ["/code/.venv/bin/fastapi", "run", "main.py", "--port", "${PORT:-8080}", "--host", "0.0.0.0"]
