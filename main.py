@@ -6,10 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from starlette.concurrency import run_in_threadpool
 from dotenv import load_dotenv
+from paddleocr import PaddleOCR
 import json
-import cv2
-import numpy as np
-import easyocr
 import os
 
 load_dotenv()
@@ -35,21 +33,24 @@ async def root():
     with open('./web/index.html', 'r', encoding="utf-8") as f:
         return f.read()
 
-reader = easyocr.Reader(['ch_tra', 'en'], gpu = False)
+# 初始化 PaddleOCR，使用 CPU 模式，支持中英文
+ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False)
     
 @app.post("/scamCheck")
 async def Check(file: UploadFile):
     img_file = BytesIO(await file.read())
 
-    img = Image.open(img_file)
-    
-    img_array = np.array(img)
-    
-    if img_array.shape[2] == 4:
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGBA2RGB)
-    
-    text = reader.readtext(img_array, detail=0)
+    # PaddleOCR 可以直接處理 BytesIO 對象
+    def sync_ocr():
+        result = ocr.ocr(img_file.getvalue())
+        # 提取文字內容
+        text_list = []
+        if result and result[0]:
+            for line in result[0]:
+                text_list.append(line[1][0])  # line[1][0] 是識別的文字
+        return text_list
 
+    text = await run_in_threadpool(sync_ocr)
     print(text)
 
     def sync_generate():
