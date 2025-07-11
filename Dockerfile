@@ -31,7 +31,7 @@ COPY . /code/
 # 安裝 Python 依賴（使用 CPU 版本的 PyTorch）
 RUN uv sync --frozen --no-cache
 
-EXPOSE 8080
+EXPOSE 8000
 
 # 修正 FastAPI 命令，指定主文件
-CMD ["/code/.venv/bin/fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["/code/.venv/bin/fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
