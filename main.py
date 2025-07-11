@@ -34,7 +34,7 @@ async def root():
         return f.read()
 
 # 初始化 PaddleOCR，使用 CPU 模式，支持中英文
-ocr = PaddleOCR(use_angle_cls=True, lang='ch', use_gpu=False)
+ocr = PaddleOCR(lang='ch', device='cpu')
     
 @app.post("/scamCheck")
 async def Check(file: UploadFile):
